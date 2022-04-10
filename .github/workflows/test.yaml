@@ -1,0 +1,73 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  test:
+    name: ""
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Lint
+        uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./fastapi-cloud-logging"
+
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-test
+
+      - name: Install Poetry
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: pip install poetry
+
+      - name: Install Development Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction
+
+      - name: Test with pytest
+        run: |
+          poetry run pytest --junit-xml results/pytest.xml
+
+      - name: Upload Unit Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: Unit Test Results (Python ${{ matrix.python-version }})
+          path: results/*.xml
+
+  publish-test-results:
+    name: "Publish Unit Tests Results"
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        with:
+          files: "artifacts/**/*.xml"
