@@ -43,14 +43,13 @@ jobs:
         with:
           path: |
             .venv
-          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}-test
+          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}-test
 
       - name: Install Development Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: poetry install --no-interaction
 
       - name: Test with pytest
-        if: matrix.python-version != '3.7'
         run: |
           poetry run pytest --junit-xml results/pytest.xml
 
