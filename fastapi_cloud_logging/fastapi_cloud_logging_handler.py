@@ -68,7 +68,10 @@ class FastAPILoggingFilter(CloudLoggingFilter):
             "protocol": request.protocol,
         }
 
-        return http_request, *_parse_xcloud_trace(request.cloud_trace_content)
+        trace_id, span_id, trace_sampled = _parse_xcloud_trace(
+            request.cloud_trace_content
+        )
+        return http_request, trace_id, span_id, trace_sampled
 
 
 class FastAPILoggingHandler(CloudLoggingHandler):
@@ -117,7 +120,7 @@ class FastAPILoggingHandler(CloudLoggingHandler):
 
         # replace default cloud logging filter
         for default_filter in self.filters:
-            if default_filter.isinstance(CloudLoggingFilter):
+            if isinstance(default_filter, CloudLoggingFilter):
                 self.removeFilter(default_filter)
 
         log_filter = FastAPILoggingFilter(
