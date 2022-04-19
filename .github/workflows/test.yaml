@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    name: ""
+    name: "Testing library"
     runs-on: ubuntu-latest
 
     strategy:
@@ -34,8 +34,10 @@ jobs:
       - uses: actions/cache@v3
         id: cache
         with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('pyproject.toml') }}-test
+          path: |
+            ~/.cache/pypoetry
+            .venv
+          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('poetry.lock') }}-test
 
       - name: Install Poetry
         if: steps.cache.outputs.cache-hit != 'true'
@@ -46,6 +48,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Test with pytest
+        if: matrix.python-version != '3.7'
         run: |
           poetry run pytest --junit-xml results/pytest.xml
 
