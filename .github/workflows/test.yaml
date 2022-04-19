@@ -29,7 +29,7 @@ jobs:
         uses: psf/black@stable
         with:
           options: "--check --verbose"
-          src: "./fastapi-cloud-logging"
+          src: "./fastapi_cloud_logging"
 
       - uses: actions/cache@v3
         id: cache
