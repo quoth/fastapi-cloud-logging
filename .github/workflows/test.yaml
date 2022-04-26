@@ -49,6 +49,10 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: poetry install --no-interaction
 
+      - name: Install Additional Development Dependencies
+        if: steps.cache.outputs.cache-hit != 'true' && matrix.python-version == 3.7
+        run: poetry install --no-interaction --extras "py37"
+
       - name: Test with pytest
         run: |
           poetry run pytest --junit-xml results/pytest.xml
