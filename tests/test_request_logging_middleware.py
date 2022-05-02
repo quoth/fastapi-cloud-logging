@@ -77,6 +77,31 @@ def test__set_request_context(middleware: RequestLoggingMiddleware):
             None,
             None,
         ),
+        (
+            Request(
+                {
+                    "type": "http",
+                    "method": "POST",
+                    "root_path": "https://example.com/",
+                    "path": "",
+                    "headers": Headers(
+                        {
+                            "User-Agent": "curl 7.79.1",
+                            "X-Forwarded-For": "192.168.0.1",
+                            "X-Cloud-Trace-Context": "105445aa7843bc8bf206b12000100000/1;o=1",
+                        }
+                    ).raw,
+                }
+            ),
+            "POST",
+            "https",
+            "192.168.0.1",
+            None,
+            "https://example.com/",
+            "curl 7.79.1",
+            None,
+            "105445aa7843bc8bf206b12000100000/1;o=1",
+        ),
     ],
 )
 def test__parse_request(
