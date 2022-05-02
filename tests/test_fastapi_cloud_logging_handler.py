@@ -1,3 +1,5 @@
+from logging import LogRecord
+
 import pytest
 from pytest_mock import MockerFixture
 
@@ -19,6 +21,62 @@ def logging_filter(mocker: MockerFixture) -> FastAPILoggingFilter:
 @pytest.fixture
 def logging_handler(mocker: MockerFixture) -> FastAPILoggingHandler:
     return FastAPILoggingHandler(mocker.Mock(), transport=mocker.Mock())
+
+
+def test_filter_without_request(logging_filter: FastAPILoggingFilter):
+    log_record: LogRecord = LogRecord(
+        name="some_log",
+        level=3,
+        pathname="tests/test_fastapi_cloud_logging_handler.py",
+        lineno=31,
+        msg="info",
+        args=None,
+        exc_info=None,
+    )
+    filtered = logging_filter.filter(log_record)
+    assert filtered is True
+    assert getattr(log_record, "trace") is None
+    assert getattr(log_record, "span_id") is None
+    assert getattr(log_record, "trace_sampled") is False
+    assert getattr(log_record, "http_request") is None
+
+
+def test_filter_with_request(logging_filter: FastAPILoggingFilter):
+    _FASTAPI_REQUEST_CONTEXT.set(
+        FastAPIRequestContext(
+            request_method="GET",
+            request_url="https://example.com/api/v1/users/me",
+            content_length=None,
+            user_agent="curl/7.77.0",
+            remote_ip="127.0.0.1",
+            referer=None,
+            protocol="https",
+            cloud_trace_content="105445ab7f43bc8bf206b12000100000/2a;o=1",
+        )
+    )
+    log_record: LogRecord = LogRecord(
+        name="some_log",
+        level=3,
+        pathname="tests/test_fastapi_cloud_logging_handler.py",
+        lineno=31,
+        msg="info",
+        args=None,
+        exc_info=None,
+    )
+    filtered = logging_filter.filter(log_record)
+    assert filtered is True
+    assert getattr(log_record, "trace") == "105445ab7f43bc8bf206b12000100000"
+    assert getattr(log_record, "span_id") == "2a"
+    assert getattr(log_record, "trace_sampled") is True
+    assert getattr(log_record, "http_request") == {
+        "requestMethod": "GET",
+        "requestUrl": "https://example.com/api/v1/users/me",
+        "requestSize": None,
+        "userAgent": "curl/7.77.0",
+        "remoteIp": "127.0.0.1",
+        "referer": None,
+        "protocol": "https",
+    }
 
 
 @pytest.mark.parametrize("sample_request_method", ["GET", None])

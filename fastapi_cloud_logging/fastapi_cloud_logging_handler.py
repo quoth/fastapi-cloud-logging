@@ -1,5 +1,3 @@
-import json
-
 from google.cloud.logging_v2.handlers import CloudLoggingFilter, CloudLoggingHandler
 from google.cloud.logging_v2.handlers._helpers import _parse_xcloud_trace
 from google.cloud.logging_v2.handlers.handlers import DEFAULT_LOGGER_NAME
@@ -18,39 +16,23 @@ class FastAPILoggingFilter(CloudLoggingFilter):
         """
         Add new Cloud Logging data to each LogRecord as it comes in
         """
-        user_labels = getattr(record, "labels", {})
         # infer request data from context_vars
         (
-            inferred_http,
-            inferred_trace,
-            inferred_span,
-            inferred_sampled,
+            http_request,
+            trace,
+            span_id,
+            trace_sampled,
         ) = self.get_request_data()
-        if inferred_trace is not None and self.project is not None:
+        if trace is not None and self.project is not None:
             # add full path for detected trace
-            inferred_trace = f"projects/{self.project}/traces/{inferred_trace}"
-        # set new record values
-        record._resource = getattr(record, "resource", None)
-        record._trace = getattr(record, "trace", inferred_trace) or None
-        record._span_id = getattr(record, "span_id", inferred_span) or None
-        record._trace_sampled = bool(getattr(record, "trace_sampled", inferred_sampled))
-        record._http_request = getattr(record, "http_request", inferred_http)
-        record._source_location = CloudLoggingFilter._infer_source_location(record)
-        # add logger name as a label if possible
-        logger_label = {"python_logger": record.name} if record.name else {}
-        record._labels = {**logger_label, **self.default_labels, **user_labels} or None
-        # create string representations for structured logging
-        record._trace_str = record._trace or ""
-        record._span_id_str = record._span_id or ""
-        record._trace_sampled_str = "true" if record._trace_sampled else "false"
-        record._http_request_str = json.dumps(
-            record._http_request or {}, ensure_ascii=False
-        )
-        record._source_location_str = json.dumps(
-            record._source_location or {}, ensure_ascii=False
-        )
-        record._labels_str = json.dumps(record._labels or {}, ensure_ascii=False)
-        return True
+            trace = f"projects/{self.project}/traces/{trace}"
+
+        setattr(record, "trace", trace)
+        setattr(record, "span_id", span_id)
+        setattr(record, "trace_sampled", trace_sampled)
+        setattr(record, "http_request", http_request)
+
+        return super().filter(record=record)
 
     def get_request_data(self):
         request = _FASTAPI_REQUEST_CONTEXT.get()
