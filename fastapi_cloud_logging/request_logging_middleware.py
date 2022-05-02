@@ -33,7 +33,7 @@ _HTTP_CONTENT_LENGTH = "content-length"
 _HTTP_USER_AGENT = "user-agent"
 _HTTP_FORWARDED_FOR_HEADER = "x-forwarded-for"
 _HTTP_REFERER_HEADER = "referer"
-_HTTP_TRACE_HEADER = "x-cloud-trace_context"
+_HTTP_TRACE_HEADER = "x-cloud-trace-context"
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
