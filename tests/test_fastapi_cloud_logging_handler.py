@@ -35,10 +35,10 @@ def test_filter_without_request(logging_filter: FastAPILoggingFilter):
     )
     filtered = logging_filter.filter(log_record)
     assert filtered is True
-    assert getattr(log_record, "trace") is None
-    assert getattr(log_record, "span_id") is None
-    assert getattr(log_record, "trace_sampled") is False
-    assert getattr(log_record, "http_request") is None
+    assert log_record._trace is None
+    assert log_record._span_id is None
+    assert log_record._trace_sampled is False
+    assert log_record._http_request is None
 
 
 def test_filter_with_request(logging_filter: FastAPILoggingFilter):
@@ -65,10 +65,10 @@ def test_filter_with_request(logging_filter: FastAPILoggingFilter):
     )
     filtered = logging_filter.filter(log_record)
     assert filtered is True
-    assert getattr(log_record, "trace") == "105445ab7f43bc8bf206b12000100000"
-    assert getattr(log_record, "span_id") == "2a"
-    assert getattr(log_record, "trace_sampled") is True
-    assert getattr(log_record, "http_request") == {
+    assert log_record._trace == "105445ab7f43bc8bf206b12000100000"
+    assert log_record._span_id == "2a"
+    assert log_record._trace_sampled is True
+    assert log_record._http_request == {
         "requestMethod": "GET",
         "requestUrl": "https://example.com/api/v1/users/me",
         "requestSize": None,
