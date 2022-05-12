@@ -40,6 +40,20 @@ handler = FastAPILoggingHandler(Client())
 setup_logging(handler)
 ```
 
+## Optional
+
+### Structured Message
+
+Cloud logging supports log entries with structured and unstructured data.
+When a log record has a structured data, it write a log entry with structured data. And when a log record contains a string message, it write a log entry as an unstructured textPayload attribute.
+
+When this structured option set True on FastAPILoggingHandler, it always write a log entry with a message attribute on a structured jsonPayload object.
+
+```python
+# default structured value is False
+handler = FastAPILoggingHandler(Client(), structured=True)
+```
+
 ## Changelog
 
 [`CHANGELOG.md`](CHANGELOG.md)
