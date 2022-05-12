@@ -12,6 +12,10 @@ class FastAPILoggingFilter(CloudLoggingFilter):
     This data can be manually overwritten using the `extras` argument when writing logs.
     """
 
+    def __init__(self, project=None, default_labels=None, structured: bool = False):
+        super().__init__(project=project, default_labels=default_labels)
+        self.structured = structured
+
     def filter(self, record):
         """
         Add new Cloud Logging data to each LogRecord as it comes in
@@ -31,6 +35,9 @@ class FastAPILoggingFilter(CloudLoggingFilter):
         setattr(record, "span_id", span_id)
         setattr(record, "trace_sampled", trace_sampled)
         setattr(record, "http_request", http_request)
+
+        if self.structured and isinstance(record.msg, str):
+            record.msg = {"message": record.msg}
 
         return super().filter(record=record)
 
@@ -71,6 +78,7 @@ class FastAPILoggingHandler(CloudLoggingHandler):
         resource=None,
         labels=None,
         stream=None,
+        structured: bool = False,
     ):
         """
         Args:
@@ -90,8 +98,9 @@ class FastAPILoggingHandler(CloudLoggingHandler):
                 Resource for this Handler. If not given, will be inferred from the environment.
             labels (Optional[dict]): Additional labels to attach to logs.
             stream (Optional[IO]): Stream to be used by the handler.
+            structured (bool): Treat every message as structured message.
         """
-        super(FastAPILoggingHandler, self).__init__(
+        super().__init__(
             client,
             name=name,
             transport=transport,
@@ -106,6 +115,6 @@ class FastAPILoggingHandler(CloudLoggingHandler):
                 self.removeFilter(default_filter)
 
         log_filter = FastAPILoggingFilter(
-            project=self.project_id, default_labels=labels
+            project=self.project_id, default_labels=labels, structured=structured
         )
         self.addFilter(log_filter)

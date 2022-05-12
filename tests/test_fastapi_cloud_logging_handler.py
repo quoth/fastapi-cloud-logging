@@ -19,6 +19,11 @@ def logging_filter(mocker: MockerFixture) -> FastAPILoggingFilter:
 
 
 @pytest.fixture
+def structured_logging_filter(mocker: MockerFixture) -> FastAPILoggingFilter:
+    return FastAPILoggingFilter(structured=True)
+
+
+@pytest.fixture
 def logging_handler(mocker: MockerFixture) -> FastAPILoggingHandler:
     return FastAPILoggingHandler(mocker.Mock(), transport=mocker.Mock())
 
@@ -77,6 +82,24 @@ def test_filter_with_request(logging_filter: FastAPILoggingFilter):
         "referer": None,
         "protocol": "https",
     }
+    assert log_record.msg == "info"
+
+
+def test_structured_filter(structured_logging_filter: FastAPILoggingFilter):
+    _FASTAPI_REQUEST_CONTEXT.set(None)
+    log_record: LogRecord = LogRecord(
+        name="some_log",
+        level=3,
+        pathname="tests/test_fastapi_cloud_logging_handler.py",
+        lineno=31,
+        msg="info",
+        args=None,
+        exc_info=None,
+    )
+    filtered = structured_logging_filter.filter(log_record)
+    assert filtered is True
+    assert log_record._http_request is None
+    assert log_record.msg == {"message": "info"}
 
 
 @pytest.mark.parametrize("sample_request_method", ["GET", None])
