@@ -10,6 +10,12 @@ repository = "https://github.com/quoth/fastapi-cloud-logging"
 include = [
     "LICENSE",
 ]
+classifiers = [
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Logging",
+    "Environment :: Web Environment",
+    "Framework :: FastAPI",
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
