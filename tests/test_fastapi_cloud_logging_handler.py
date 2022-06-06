@@ -46,6 +46,26 @@ def test_filter_without_request(logging_filter: FastAPILoggingFilter):
     assert log_record._http_request is None
 
 
+def test_filter_with_loguru_extra(logging_filter: FastAPILoggingFilter):
+    log_record: LogRecord = LogRecord(
+        name="some_log",
+        level=3,
+        pathname="tests/test_fastapi_cloud_logging_handler.py",
+        lineno=31,
+        msg="info",
+        args=None,
+        exc_info=None,
+    )
+    setattr(log_record, "extra", {"user_id": "user1234"})
+    filtered = logging_filter.filter(log_record)
+    assert filtered is True
+    assert log_record._trace is None
+    assert log_record._span_id is None
+    assert log_record._trace_sampled is False
+    assert log_record._http_request is None
+    assert log_record.json_fields["user_id"] == "user1234"
+
+
 def test_filter_with_request(logging_filter: FastAPILoggingFilter):
     _FASTAPI_REQUEST_CONTEXT.set(
         FastAPIRequestContext(

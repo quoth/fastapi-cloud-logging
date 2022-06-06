@@ -1,9 +1,12 @@
+import json
+
 from google.cloud.logging_v2.handlers import CloudLoggingFilter, CloudLoggingHandler
 from google.cloud.logging_v2.handlers._helpers import _parse_xcloud_trace
 from google.cloud.logging_v2.handlers.handlers import DEFAULT_LOGGER_NAME
 from google.cloud.logging_v2.handlers.transports import BackgroundThreadTransport
 
 from .request_logging_middleware import _FASTAPI_REQUEST_CONTEXT
+from .utils import serialize_json
 
 
 class FastAPILoggingFilter(CloudLoggingFilter):
@@ -38,6 +41,11 @@ class FastAPILoggingFilter(CloudLoggingFilter):
 
         if self.structured and isinstance(record.msg, str):
             record.msg = {"message": record.msg}
+
+        # for loguru
+        if hasattr(record, "extra"):
+            extra = getattr(record, "extra", {})
+            record.json_fields = json.loads(json.dumps(extra, default=serialize_json))
 
         return super().filter(record=record)
 
