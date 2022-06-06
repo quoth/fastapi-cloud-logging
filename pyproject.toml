@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastapi-cloud-logging"
-version = "0.8.4"
+version = "1.0.0"
 description = "Cloud Logging For FastAPI"
 authors = ["quoth <4wordextinguisher@gmail.com>"]
 readme = "README.md"
