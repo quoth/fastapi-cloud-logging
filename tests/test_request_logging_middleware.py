@@ -22,6 +22,7 @@ def test__set_request_context(middleware: RequestLoggingMiddleware):
             "root_path": "https://example.com/",
             "path": "",
             "headers": Headers({}).raw,
+            "client": ("127.0.0.1", 80),
         }
     )
     middleware.set_request_context(request=request)
@@ -45,6 +46,7 @@ def test__set_request_context(middleware: RequestLoggingMiddleware):
                     "root_path": "https://example.com/",
                     "path": "",
                     "headers": Headers({"X-Forwarded-For": "192.168.0.1"}).raw,
+                    "client": ("127.0.0.1", 80),
                 }
             ),
             "GET",
@@ -66,6 +68,7 @@ def test__set_request_context(middleware: RequestLoggingMiddleware):
                     "headers": Headers(
                         {"User-Agent": "curl 7.79.1", "X-Forwarded-For": "192.168.0.1"}
                     ).raw,
+                    "client": ("127.0.0.1", 80),
                 }
             ),
             "POST",
@@ -91,6 +94,7 @@ def test__set_request_context(middleware: RequestLoggingMiddleware):
                             "X-Cloud-Trace-Context": "105445aa7843bc8bf206b12000100000/1;o=1",
                         }
                     ).raw,
+                    "client": ("127.0.0.1", 80),
                 }
             ),
             "POST",
