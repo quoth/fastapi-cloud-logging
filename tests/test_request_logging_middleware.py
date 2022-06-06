@@ -30,6 +30,7 @@ def test__set_request_context(middleware: RequestLoggingMiddleware):
     assert request_context is not None
     assert request_context.protocol == "https"
     assert request_context.request_method == "GET"
+    assert request_context.remote_ip == "127.0.0.1"
 
 
 @pytest.mark.parametrize(
