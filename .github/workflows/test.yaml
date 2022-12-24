@@ -1,11 +1,11 @@
 name: Test
 
 on:
-  push:
-    branches:
-      - master
   pull_request:
     types: [opened, synchronize]
+    paths:
+      - fastapi_cloud_logging/**/*.py
+      - tests/**/*.py
 
 jobs:
   test:
