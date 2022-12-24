@@ -1,4 +1,5 @@
 import json
+import traceback
 
 from google.cloud.logging_v2.handlers import CloudLoggingFilter, CloudLoggingHandler
 from google.cloud.logging_v2.handlers._helpers import _parse_xcloud_trace
@@ -46,6 +47,15 @@ class FastAPILoggingFilter(CloudLoggingFilter):
         if hasattr(record, "extra"):
             extra = getattr(record, "extra", {})
             record.json_fields = json.loads(json.dumps(extra, default=serialize_json))
+
+        if record.exc_info is not None:
+            error_type, _, exc_trace = record.exc_info
+            if error_type is not None:
+                json_fields = getattr(record, "json_fields", {})
+                json_fields["traceback"] = traceback.format_tb(exc_trace)
+                record.json_fields = json_fields
+            # Avoid unnecessary information
+            record.exc_info = None
 
         return super().filter(record=record)
 
