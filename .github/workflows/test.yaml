@@ -6,6 +6,8 @@ on:
     paths:
       - fastapi_cloud_logging/**/*.py
       - tests/**/*.py
+      - poetry.lock
+      - pyproject.toml
 
 jobs:
   test:
