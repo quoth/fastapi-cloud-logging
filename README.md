@@ -54,6 +54,16 @@ When this structured option set True on FastAPILoggingHandler, it always write a
 handler = FastAPILoggingHandler(Client(), structured=True)
 ```
 
+### Error trace
+
+On logging with an error, message payloads includes traceback from an error.
+If you do not want to include traceback, you should set traceback_length to 0.
+
+```python
+# default traceback_length is 100
+handler = FastAPILoggingHandler(Client(), traceback_length=0)
+```
+
 ## Changelog
 
 [`CHANGELOG.md`](CHANGELOG.md)
