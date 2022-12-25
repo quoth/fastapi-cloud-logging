@@ -33,7 +33,7 @@ def divide(a, b):
     return a / b
 
 
-def test_with_logger_exception(logging_handler: FastAPILoggingHandler, logger: Logger):
+def test_exception(logging_handler: FastAPILoggingHandler, logger: Logger):
     try:
         divide(5, 0)
     except ZeroDivisionError as e:
@@ -46,3 +46,23 @@ def test_with_logger_exception(logging_handler: FastAPILoggingHandler, logger: L
     assert args["source_location"] is not None
     assert message_payloads["message"] == "An error has occurred"
     assert len(message_payloads["traceback"]) == 2
+
+
+def test_exception_not_including_trace(mocker: MockerFixture):
+    logger = Logger("no_trace_logger")
+    logging_handler = FastAPILoggingHandler(
+        mocker.Mock(), transport=mocker.Mock(), structured=True, traceback_length=0
+    )
+    logger.addHandler(logging_handler)
+    try:
+        divide(5, 0)
+    except ZeroDivisionError as e:
+        logger.exception("An error has occurred", exc_info=e)
+
+    (record, message_payloads), args = logging_handler.transport.send.call_args
+
+    assert record.exc_info is None
+    assert args["labels"]["python_logger"] == "no_trace_logger"
+    assert args["source_location"] is not None
+    assert message_payloads["message"] == "An error has occurred"
+    assert ("traceback" in message_payloads) is False

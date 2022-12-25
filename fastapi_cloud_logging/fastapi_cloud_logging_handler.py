@@ -16,9 +16,16 @@ class FastAPILoggingFilter(CloudLoggingFilter):
     This data can be manually overwritten using the `extras` argument when writing logs.
     """
 
-    def __init__(self, project=None, default_labels=None, structured: bool = False):
+    def __init__(
+        self,
+        project=None,
+        default_labels=None,
+        structured: bool = False,
+        traceback_length: int = 100,
+    ):
         super().__init__(project=project, default_labels=default_labels)
         self.structured = structured
+        self.traceback_length = traceback_length
 
     def filter(self, record):
         """
@@ -52,7 +59,10 @@ class FastAPILoggingFilter(CloudLoggingFilter):
             error_type, _, exc_trace = record.exc_info
             if error_type is not None:
                 json_fields = getattr(record, "json_fields", {})
-                json_fields["traceback"] = traceback.format_tb(exc_trace)
+                if self.traceback_length > 0:
+                    json_fields["traceback"] = traceback.format_tb(exc_trace)[
+                        : self.traceback_length
+                    ]
                 record.json_fields = json_fields
             # Avoid unnecessary information
             record.exc_info = None
@@ -97,6 +107,7 @@ class FastAPILoggingHandler(CloudLoggingHandler):
         labels=None,
         stream=None,
         structured: bool = False,
+        traceback_length: int = 100,
     ):
         """
         Args:
@@ -133,6 +144,9 @@ class FastAPILoggingHandler(CloudLoggingHandler):
                 self.removeFilter(default_filter)
 
         log_filter = FastAPILoggingFilter(
-            project=self.project_id, default_labels=labels, structured=structured
+            project=self.project_id,
+            default_labels=labels,
+            structured=structured,
+            traceback_length=traceback_length,
         )
         self.addFilter(log_filter)
