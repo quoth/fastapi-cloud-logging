@@ -71,6 +71,9 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
 
+    permissions:
+      contents: write
+
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@v3
