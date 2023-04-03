@@ -25,7 +25,7 @@ google-cloud-logging = "~3"
 [tool.poetry.dev-dependencies]
 flake8 = "^5.0.4"
 isort = "^5.10.1"
-black = "^23.1.0"
+black = "^23.3.0"
 pytest = "^7.0.1"
 pytest-mock = "^3.7.0"
 importlib_metadata = { version = "^4.2", optional = true, extras = ["py37"] }
