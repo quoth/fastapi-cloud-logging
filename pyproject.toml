@@ -30,7 +30,7 @@ pytest = "^7.0.1"
 pytest-mock = "^3.7.0"
 importlib_metadata = { version = "^4.2", optional = true, extras = ["py37"] }
 uvicorn = {version = "^0.20.0", extras = ["local"]}
-loguru = {version = "^0.6.0", extras = ["local"]}
+loguru = {version = "^0.7.0", extras = ["local"]}
 
 [tool.poetry.extras]
 py37 = ["importlib_metadata"]
