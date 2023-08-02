@@ -54,5 +54,6 @@ addopts = [
 ]
 xfail_strict = true
 filterwarnings = [
-    "error"
+    "error",
+    "ignore:pkg_resources is deprecated"
 ]
